@@ -35,7 +35,7 @@ int station(int s) {
         case 6:  c = 8 * MAP_SIZE + 6; break;
         case 7:  c = 6 * MAP_SIZE + 8; break;
         case 8:  c = 4 * MAP_SIZE + 8; break;
-        case 9:  c = 8 * MAP_SIZE + 8; break;
+        case 9:  c = 2 * MAP_SIZE + 8; break;
         case 10: c = 0 * MAP_SIZE + 6; break;
         case 11: c = 0 * MAP_SIZE + 4; break;
         case 12: c = 0 * MAP_SIZE + 2; break;
