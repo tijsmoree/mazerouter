@@ -198,16 +198,116 @@ Maze *createMaze(int si) {
         for(j = 1; j < 9; j += 2)
             maze->map[i][j] = -1;
 
-    setDir(maze, si);
-
     maze->x[0] = station(si) / 10;
     maze->y[0] = station(si) % 10;
 
     for(i = 1; i < MAX_ROUTE; i++) maze->x[i] = 0, maze->y[i] = 0;
 
+    setDir(maze, si); printf("%c\n", maze->d[0]);
+
     maze->i++;
 
     return maze;
+}
+
+void goLeft(Maze *maze) {
+    int last = maze->i - 1, this = maze->i;
+    int x = maze->x[last], y = maze->y[last];
+
+    switch(maze->d[last]) {
+        case 'u':
+            maze->d[this] = 'l';
+            x--;
+        case 'd':
+            maze->d[this] = 'r';
+            x++;
+        case 'r':
+            maze->d[this] = 'u';
+            y++;
+        case 'l':
+            maze->d[this] = 'd';
+            y--;
+    }
+
+    maze->x[this] = x;
+    maze->y[this] = y;
+
+    maze->i++;
+}
+
+void goRight(Maze *maze) {
+    int last = maze->i - 1, this = maze->i;
+    int x = maze->x[last], y = maze->y[last];
+
+    switch(maze->d[last]) {
+        case 'u':
+            maze->d[this] = 'r';
+            x++;
+        case 'd':
+            maze->d[this] = 'l';
+            x--;
+        case 'r':
+            maze->d[this] = 'd';
+            y--;
+        case 'l':
+            maze->d[this] = 'u';
+            y++;
+    }
+
+    maze->x[this] = x;
+    maze->y[this] = y;
+
+    maze->i++;
+}
+
+void goForward(Maze *maze) {
+    int last = maze->i - 1, this = maze->i;
+    int x = maze->x[last], y = maze->y[last];
+
+    switch(maze->d[last]) {
+        case 'u':
+            maze->d[this] = 'u';
+            y++;
+        case 'd':
+            maze->d[this] = 'd';
+            y--;
+        case 'r':
+            maze->d[this] = 'r';
+            x++;
+        case 'l':
+            maze->d[this] = 'l';
+            x--;
+    }
+
+    maze->x[this] = x;
+    maze->y[this] = y;
+
+    (maze->i)++;
+}
+
+void goBack(Maze *maze) {
+    int last = maze->i - 1, this = maze->i;
+    int x = maze->x[last], y = maze->y[last];
+
+    switch(maze->d[last]) {
+        case 'u':
+            maze->d[this] = 'd';
+            y--;
+        case 'd':
+            maze->d[this] = 'u';
+            y++;
+        case 'r':
+            maze->d[this] = 'l';
+            x--;
+        case 'l':
+            maze->d[this] = 'r';
+            x++;
+    }
+
+    maze->x[this] = x;
+    maze->y[this] = y;
+
+    maze->i++;
 }
 
 void testPrint(Maze *maze) {
@@ -261,39 +361,38 @@ void calculateNext(Maze *maze, int xe, int ye) {
         }
     }
 
-    /*for(i = 8; i >= 0; i--) {
+    for(i = 8; i >= 0; i--) {
         for(j = 0; j < 9; j++) {
             printf("%d\t", map[j][i]);
         }
         printf("\n");
-    }*/
+    }printf("%d\n", maze->i);
 
     i = maze->x[ind - 1]; j = maze->y[ind - 1]; p--;
 
-    if(maze->d[maze->i - 1] == 'r') {
-        if     (i != 8 && map[i + 1][j] == p) i++, maze->d[maze->i] = 'r';
-        else if(j != 8 && map[i][j + 1] == p) j++, maze->d[maze->i] = 'u';
-        else if(j != 0 && map[i][j - 1] == p) j--, maze->d[maze->i] = 'd';
+    if       (maze->d[maze->i - 1] == 'r') {
+        if     (i != 8 && map[i + 1][j] == p) goForward(maze);
+        else if(j != 0 && map[i][j - 1] == p) goRight(maze);
+        else if(j != 8 && map[i][j + 1] == p) goLeft(maze);
+        else if(j != 0 && map[i][j - 1] == p) goBack(maze);
     } else if(maze->d[maze->i - 1] == 'd') {
-        if     (j != 0 && map[i][j - 1] == p) j--, maze->d[maze->i] = 'd';
-        else if(i != 0 && map[i - 1][j] == p) i--, maze->d[maze->i] = 'l';
-        else if(i != 8 && map[i + 1][j] == p) i++, maze->d[maze->i] = 'r';
+        if     (j != 0 && map[i][j - 1] == p) goForward(maze);
+        else if(i != 0 && map[i - 1][j] == p) goRight(maze);
+        else if(i != 8 && map[i + 1][j] == p) goLeft(maze);
+        else if(i != 0 && map[i - 1][j] == p) goBack(maze);
     } else if(maze->d[maze->i - 1] == 'u') {
-        if     (j != 8 && map[i][j + 1] == p) j++, maze->d[maze->i] = 'u';
-        else if(i != 0 && map[i - 1][j] == p) i--, maze->d[maze->i] = 'l';
-        else if(i != 8 && map[i + 1][j] == p) i++, maze->d[maze->i] = 'r';
+        if     (j != 8 && map[i][j + 1] == p) goForward(maze);
+        else if(i != 8 && map[i + 1][j] == p) goRight(maze);
+        else if(i != 0 && map[i - 1][j] == p) goLeft(maze);
+        else if(i != 8 && map[i + 1][j] == p) goBack(maze);
     } else if(maze->d[maze->i - 1] == 'l') {
-        if     (i != 0 && map[i - 1][j] == p) i--, maze->d[maze->i] = 'l';
-        else if(j != 8 && map[i][j + 1] == p) j++, maze->d[maze->i] = 'u';
-        else if(j != 0 && map[i][j - 1] == p) j--, maze->d[maze->i] = 'd';
+        if     (i != 0 && map[i - 1][j] == p) goForward(maze);
+        else if(j != 8 && map[i][j + 1] == p) goRight(maze);
+        else if(j != 0 && map[i][j - 1] == p) goLeft(maze);
+        else if(j != 8 && map[i][j + 1] == p) goBack(maze);
     }
 
-    printf("%c\n", maze->d[maze->i - 1]);
-
-    maze->x[ind] = i;
-    maze->y[ind] = j;
-
-    maze->i++;
+    testPrint(maze); getch();
 }
 
 void createMines(int map[9][9], int n) {
@@ -421,11 +520,10 @@ void a() {
         
         while((maze->x[maze->i-1] != xe) || (maze->y[maze->i-1] != ye)) {
             calculateNext(maze, xe, ye);
+            printf("%d %d %d %d\n", xe, ye, maze->x[maze->i-1], maze->y[maze->i-1]);
         }
 
-        maze->i--;
-        setDir(maze, chks[i]);
-        maze->i++;
+        goBack(maze);
     }
 
     testPrint(maze);
