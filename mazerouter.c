@@ -1,5 +1,5 @@
 #define MAX_ROUTE 150
-#define MAP_SIZE 9
+#define MAP_SIZE 11
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,18 +27,18 @@ int station(int s) {
     int c;
 
     switch(s) {
-        case 1:  c = 2 * MAP_SIZE + 0; break;
-        case 2:  c = 4 * MAP_SIZE + 0; break;
-        case 3:  c = 6 * MAP_SIZE + 0; break;
-        case 4:  c = 8 * MAP_SIZE + 2; break;
-        case 5:  c = 8 * MAP_SIZE + 4; break;
-        case 6:  c = 8 * MAP_SIZE + 6; break;
-        case 7:  c = 6 * MAP_SIZE + 8; break;
-        case 8:  c = 4 * MAP_SIZE + 8; break;
-        case 9:  c = 2 * MAP_SIZE + 8; break;
-        case 10: c = 0 * MAP_SIZE + 6; break;
-        case 11: c = 0 * MAP_SIZE + 4; break;
-        case 12: c = 0 * MAP_SIZE + 2; break;
+        case 1:  c = 3  * MAP_SIZE +  0; break;
+        case 2:  c = 5  * MAP_SIZE +  0; break;
+        case 3:  c = 7  * MAP_SIZE +  0; break;
+        case 4:  c = 10 * MAP_SIZE +  3; break;
+        case 5:  c = 10 * MAP_SIZE +  5; break;
+        case 6:  c = 10 * MAP_SIZE +  7; break;
+        case 7:  c = 7  * MAP_SIZE + 10; break;
+        case 8:  c = 5  * MAP_SIZE + 10; break;
+        case 9:  c = 3  * MAP_SIZE + 10; break;
+        case 10: c = 0  * MAP_SIZE +  7; break;
+        case 11: c = 0  * MAP_SIZE +  5; break;
+        case 12: c = 0  * MAP_SIZE +  3; break;
     }
 
     return c;
@@ -189,22 +189,29 @@ Maze *createMaze(int si) {
 
     maze->i = 0;
 
-    /* initialize the maze at 0 */
     for(i = 0; i < MAP_SIZE; i++)
         for(j = 0; j < MAP_SIZE; j++)
+            maze->map[i][j] = -1;
+
+    /* initialize the maze at 0 */
+    for(i = 1; i < MAP_SIZE - 1; i++)
+        for(j = 1; j < MAP_SIZE - 1; j++)
             maze->map[i][j] = 0;
 
     /* make the empty spots - 1 */
-    for(i = 1; i < MAP_SIZE; i += 2)
-        for(j = 1; j < MAP_SIZE; j += 2)
+    for(i = 2; i < MAP_SIZE - 2; i += 2)
+        for(j = 2; j < MAP_SIZE - 2; j += 2)
             maze->map[i][j] = -1;
+
+    for(i = 1; i <= 12; i++)
+        maze->map[station(i) / MAP_SIZE][station(i) % MAP_SIZE] = 0;
 
     maze->x[0] = station(si) / MAP_SIZE;
     maze->y[0] = station(si) % MAP_SIZE;
 
     for(i = 1; i < MAX_ROUTE; i++) maze->x[i] = 0, maze->y[i] = 0;
 
-    setDir(maze, si); printf("%c\n", maze->d[0]);
+    setDir(maze, si);
 
     maze->i++;
 
@@ -333,18 +340,16 @@ void testPrint(Maze *maze) {
     for(i = 0; i < MAP_SIZE; i++) {
         for(j = 0; j < MAP_SIZE; j++) {
             switch(maze->map[i][j]) {
-                case 0: test[i][j] = '.'; break;
-                case -1: test[i][j] = 'X'; break;
+                case  0: test[i][j] = '.'; break;
+                case -1: test[i][j] = ' '; break;
+                case -2: test[i][j] = 'X'; break;
             }
         }
     }
 
-    for(i = 1; i < MAP_SIZE; i += 2)
-        for(j = 1; j < MAP_SIZE; j += 2)
-            test[i][j] = ' ';
-
     for(i = 0; i < maze->i; i++)
-        test[maze->x[i]][maze->y[i]] = '+';
+        if(test[maze->x[i]][maze->y[i]] != 'X')
+            test[maze->x[i]][maze->y[i]] = '+';
 
     for(i = MAP_SIZE - 1; i >= 0; i--) {
         for(j = 0; j < MAP_SIZE; j++) {
@@ -369,20 +374,25 @@ void calculateNext(Maze *maze, int xe, int ye) {
             for(j = 0; j < MAP_SIZE; j++) {
                 if(map[i][j]) continue;
 
-                if(i != 8 && map[i + 1][j] == p) map[i][j] = p + 1;
-                if(i != 0 && map[i - 1][j] == p) map[i][j] = p + 1;
-                if(j != 8 && map[i][j + 1] == p) map[i][j] = p + 1;
-                if(j != 0 && map[i][j - 1] == p) map[i][j] = p + 1;
+                if(i != MAP_SIZE - 1 && map[i + 1][j] == p) map[i][j] = p + 1;
+                if(i != 0            && map[i - 1][j] == p) map[i][j] = p + 1;
+                if(j != MAP_SIZE - 1 && map[i][j + 1] == p) map[i][j] = p + 1;
+                if(j != 0            && map[i][j - 1] == p) map[i][j] = p + 1;
             }
         }
+        /*for(i = MAP_SIZE - 1; i >= 0; i--) {
+            for(j = 0; j < MAP_SIZE; j++) {
+                printf("%d\t", map[j][i]);
+            } printf("\n");
+        } printf("\n");*/
     }
 
-    for(i = MAP_SIZE - 1; i >= 0; i--) {
+    /*for(i = MAP_SIZE - 1; i >= 0; i--) {
         for(j = 0; j < MAP_SIZE; j++) {
             printf("%d\t", map[j][i]);
         }
         printf("\n");
-    }
+    }*/
 
     i = maze->x[ind - 1]; j = maze->y[ind - 1]; p--;
 
@@ -408,7 +418,7 @@ void calculateNext(Maze *maze, int xe, int ye) {
         else if(i != MAP_SIZE - 1 && map[i + 1][j] == p) goBack(maze);
     }
 
-    testPrint(maze); getch();
+    testPrint(maze);
 }
 
 void createMines(int map[MAP_SIZE][MAP_SIZE], int n) {
@@ -424,7 +434,7 @@ void createMines(int map[MAP_SIZE][MAP_SIZE], int n) {
             if(map[x][y]) p = 1;
         }
 
-        map[x][y] = -1;
+        map[x][y] = -2;
     }
 }
 
@@ -490,6 +500,8 @@ int closestNonExplored(Maze *maze) {
 void askChks(int chks[], int n) {
     int i;
 
+    printf("Which checkpoints shall I visit? ");
+
     for(i = 0; i < n; i++) {
         scanf("%d", chks + i);
 
@@ -501,9 +513,9 @@ void askChks(int chks[], int n) {
 }
 
 int askMine(Maze *maze) {
-    int a = 0;
+    int a = 0, x = maze->x[maze->i-1], y = maze->y[maze->i-1];
 
-    if((maze->x[maze->i-1] + maze->y[maze->i-1]) % 2) {
+    if((x + y) % 2 && x != 0 && x != MAP_SIZE - 1 && y != 0 && y != MAP_SIZE - 1) {
         testPrint(maze);
         printf("Mine (1/0)? ");
         scanf("%d", &a);
@@ -511,13 +523,13 @@ int askMine(Maze *maze) {
     }
 
     return a;
-}
 
+}
 void a() {
     int i, si = 1, chks[3] = {5, 7, 11}, xe, ye;
     Maze *maze;
 
-    askChks(chks, 3);
+    /*askChks(chks, 3);*/
 
     maze = createMaze(si);
 
@@ -532,7 +544,6 @@ void a() {
             printf("%d %d %d %d\n", xe, ye, maze->x[maze->i-1], maze->y[maze->i-1]);
         }
 
-        
         goBack(maze);
     }
 
@@ -543,7 +554,7 @@ void b() {
     int c, si = 1, chks[3] = {11, 7, 5}, xe, ye;
     Maze *maze = createMaze(si);
 
-    askChks(chks, 3);
+    /*askChks(chks, 3);*/
 
     rearrangeChks(maze, chks, 3, station(si) / MAP_SIZE, station(si) % MAP_SIZE);
 
@@ -555,9 +566,9 @@ void b() {
             calculateNext(maze, xe, ye);
 
             if(askMine(maze)) {
-                maze->i--;
-                swapDir(maze);
-                maze->map[maze->x[maze->i]][maze->y[maze->i]] = -1;
+                goBack(maze);
+                maze->map[maze->x[maze->i - 2]][maze->y[maze->i - 2]] = -2;
+
                 rearrangeChks(maze, chks + c, 3 - c, maze->x[maze->i - 1], maze->y[maze->i - 1]);
 
                 xe = station(chks[c]) / MAP_SIZE;
@@ -599,14 +610,14 @@ void c() {
 
         calculateNext(maze, xy / MAP_SIZE, xy % MAP_SIZE);
 
-        if(mines[maze->x[maze->i - 1]][maze->y[maze->i - 1]] == -1) {
+        if(mines[maze->x[maze->i - 1]][maze->y[maze->i - 1]] == -2) {
             maze->i -= 2;
-            swapDir(maze);
+            /*swapDir(maze);*/
             maze->i++;
-            maze->map[maze->x[maze->i]][maze->y[maze->i]] = -1;
+            maze->map[maze->x[maze->i]][maze->y[maze->i]] = -2;
         }
 
-        /*if(maze->x[maze->i] == 0 && maze->y[maze->i] == 0)*/ getchar();
+        /*if(maze->x[maze->i] == 0 && maze->y[maze->i] == 0)*/ getch();
 
         /*testPrint(maze);*/
     }
