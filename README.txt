@@ -1,4 +1,3 @@
-#How to install
 je moet de gtk.rar uitpakken in je C schijf zodat je hem hebt als C:\gtk
 ook moet je dan in je PATH variable de volgende toevoegen: C:\gtk\bin
 
